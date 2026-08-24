@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Check, Mic, RotateCcw, Square } from 'lucide-react';
+import { Keyboard, Mic, RotateCcw, Square } from 'lucide-react';
 import { EmptyState } from '@/src/components/EmptyState';
 import { ProgressBar } from '@/src/components/ProgressBar';
 import { SpeechButton } from '@/src/components/SpeechButton';
@@ -25,6 +25,7 @@ import { stopSpeech } from '@/src/utils/speech';
 
 type InterviewCount = 5 | 10 | 20 | 'all';
 type InterviewOrder = 'random' | 'in-order';
+type InterviewMethod = 'voice' | 'typed';
 type VoiceStatus = 'idle' | 'listening' | 'processing' | 'complete' | 'error';
 
 interface VoiceResult {
@@ -36,11 +37,13 @@ interface VoiceResult {
 export function VoiceInterviewPage() {
   const [count, setCount] = useState<InterviewCount>(20);
   const [order, setOrder] = useState<InterviewOrder>('random');
+  const [method, setMethod] = useState<InterviewMethod>('voice');
   const [sessionQuestions, setSessionQuestions] = useState<CitizenshipQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [status, setStatus] = useState<VoiceStatus>('idle');
   const [supported, setSupported] = useState(true);
   const [transcript, setTranscript] = useState('');
+  const [typedAnswer, setTypedAnswer] = useState('');
   const [evaluation, setEvaluation] = useState<AnswerEvaluation | null>(null);
   const [answerVisible, setAnswerVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -117,9 +120,7 @@ export function VoiceInterviewPage() {
       setEvaluation(result);
       setTranscript(cleaned);
       setStatus('complete');
-      if (result.outcome === 'correct') {
-        saveResult(currentQuestion.id, result.outcome, cleaned, true);
-      }
+      saveResult(currentQuestion.id, result.outcome, cleaned);
     };
 
     recognition.onresult = (event) => {
@@ -167,22 +168,28 @@ export function VoiceInterviewPage() {
     recognitionRef.current?.stop();
   };
 
-  const markCorrect = () => {
+  const checkTypedAnswer = () => {
     if (!currentQuestion) {
       return;
     }
-    const text = transcript || 'Marked correct manually';
-    saveResult(currentQuestion.id, 'correct', text, true);
-    setEvaluation({
-      outcome: 'correct',
-      requiredMatches: inferRequiredMatches(currentQuestion),
-      matchedCount: inferRequiredMatches(currentQuestion),
-      matchedAnswers: [],
-      missingCount: 0,
-      normalizedTranscript: '',
-      message: 'Marked correct.',
-    });
+
+    const cleaned = typedAnswer.trim();
+    if (!cleaned) {
+      setStatus('error');
+      setErrorMessage('Type your answer before checking it.');
+      return;
+    }
+
+    stopRecognition();
+    stopSpeech();
+    setAnswerVisible(false);
+    setErrorMessage('');
+    setStatus('processing');
+    const result = evaluateSpokenAnswer(currentQuestion, cleaned);
+    setTranscript(cleaned);
+    setEvaluation(result);
     setStatus('complete');
+    saveResult(currentQuestion.id, result.outcome, cleaned);
   };
 
   const goNext = () => {
@@ -191,7 +198,7 @@ export function VoiceInterviewPage() {
     }
 
     if (!results.some((result) => result.questionId === currentQuestion.id)) {
-      saveResult(currentQuestion.id, evaluation?.outcome ?? 'incorrect', transcript, evaluation?.outcome === 'correct');
+      saveResult(currentQuestion.id, evaluation?.outcome ?? 'incorrect', transcript || typedAnswer);
     }
 
     resetAttempt();
@@ -208,7 +215,7 @@ export function VoiceInterviewPage() {
             Real Interview Complete
           </p>
           <h1>{correctCount} / {sessionQuestions.length} Correct</h1>
-          <ProgressBar label="Voice interview score" value={correctCount} max={sessionQuestions.length} detail={`${percent}%`} />
+          <ProgressBar label="Real interview score" value={correctCount} max={sessionQuestions.length} detail={`${percent}%`} />
           <div className="result-actions">
             <button className="primary-action focus-ring" type="button" onClick={begin}>
               Start Again
@@ -230,10 +237,10 @@ export function VoiceInterviewPage() {
             <USFlagMark />
             Real Interview
           </p>
-          <h1>Answer by Audio</h1>
+          <h1>Real Interview</h1>
           <p>
-            Practice like the interview: hear or read a question, answer out loud, and let your browser check the key
-            answer words. Your audio is not saved or uploaded.
+            Practice like the interview: answer out loud or type your response, and let the system check the key answer
+            words. Audio stays in your browser and typed answers use the same checker.
           </p>
         </div>
 
@@ -262,14 +269,25 @@ export function VoiceInterviewPage() {
             </SegmentedButton>
           </SettingGroup>
 
-          {!supported ? (
+          <SettingGroup label="Answer Method">
+            <SegmentedButton active={method === 'voice'} onClick={() => setMethod('voice')}>
+              <Mic aria-hidden="true" size={16} />
+              Audio Answer
+            </SegmentedButton>
+            <SegmentedButton active={method === 'typed'} onClick={() => setMethod('typed')}>
+              <Keyboard aria-hidden="true" size={16} />
+              Type Answer
+            </SegmentedButton>
+          </SettingGroup>
+
+          {!supported && method === 'voice' ? (
             <EmptyState
               title="Voice checking is not available"
-              description="This browser does not support built-in speech recognition. You can still use Practice mode and grade yourself."
+              description="This browser does not support built-in speech recognition. Choose Type Answer to keep using system-graded interview practice."
             />
           ) : (
             <button className="primary-action focus-ring" type="button" onClick={begin}>
-              <Mic aria-hidden="true" size={18} />
+              {method === 'voice' ? <Mic aria-hidden="true" size={18} /> : <Keyboard aria-hidden="true" size={18} />}
               Start Real Interview
             </button>
           )}
@@ -305,32 +323,63 @@ export function VoiceInterviewPage() {
           <SpeechButton label="Listen to interview question" text={currentQuestion.question} variant="primary" />
         </div>
 
-        <div className="voice-control-row" aria-live="polite">
-          {status === 'listening' ? (
-            <>
-              <div className="listening-indicator">
-                <span aria-hidden="true" />
-                Listening...
-              </div>
-              <button className="secondary-action focus-ring" type="button" onClick={stopListening} aria-label="Stop listening">
-                <Square aria-hidden="true" size={16} />
-                Stop
+        {method === 'voice' ? (
+          <div className="voice-control-row" aria-live="polite">
+            {status === 'listening' ? (
+              <>
+                <div className="listening-indicator">
+                  <span aria-hidden="true" />
+                  Listening...
+                </div>
+                <button className="secondary-action focus-ring" type="button" onClick={stopListening} aria-label="Stop listening">
+                  <Square aria-hidden="true" size={16} />
+                  Stop
+                </button>
+              </>
+            ) : (
+              <button className="primary-action mic-action focus-ring" type="button" onClick={startListening}>
+                <Mic aria-hidden="true" size={18} />
+                Answer by Audio
               </button>
-            </>
-          ) : (
-            <button className="primary-action mic-action focus-ring" type="button" onClick={startListening}>
-              <Mic aria-hidden="true" size={18} />
-              Answer by Audio
+            )}
+          </div>
+        ) : (
+          <form
+            className="typed-answer-panel"
+            onSubmit={(event) => {
+              event.preventDefault();
+              checkTypedAnswer();
+            }}
+          >
+            <label htmlFor="typed-answer">Type your interview answer</label>
+            <textarea
+              id="typed-answer"
+              value={typedAnswer}
+              onChange={(event) => {
+                setTypedAnswer(event.target.value);
+                if (status === 'error' || evaluation || transcript) {
+                  setStatus('idle');
+                  setErrorMessage('');
+                  setEvaluation(null);
+                  setTranscript('');
+                }
+              }}
+              placeholder="Example: The Constitution"
+              rows={4}
+            />
+            <button className="primary-action focus-ring" type="submit">
+              <Keyboard aria-hidden="true" size={17} />
+              Check Answer
             </button>
-          )}
-        </div>
+          </form>
+        )}
 
         {status === 'processing' ? <p className="voice-helper">Checking answer...</p> : null}
         {status === 'error' ? <p className="voice-error" role="status">{errorMessage}</p> : null}
 
         {transcript ? (
           <section className="transcript-panel" aria-label="Recognized transcript">
-            <p>I heard</p>
+            <p>{method === 'voice' ? 'I heard' : 'Your answer'}</p>
             <strong>{`"${transcript}"`}</strong>
           </section>
         ) : null}
@@ -357,16 +406,22 @@ export function VoiceInterviewPage() {
         ) : null}
 
         <div className="result-actions">
-          <button className="secondary-action focus-ring" type="button" onClick={startListening}>
+          <button
+            className="secondary-action focus-ring"
+            type="button"
+            onClick={() => {
+              if (method === 'voice') {
+                startListening();
+              } else {
+                resetAttempt();
+              }
+            }}
+          >
             <RotateCcw aria-hidden="true" size={16} />
             Try Again
           </button>
           <button className="secondary-action focus-ring" type="button" onClick={() => setAnswerVisible((value) => !value)}>
             {answerVisible ? 'Hide Official Answer' : 'Show Official Answer'}
-          </button>
-          <button className="success-action focus-ring" type="button" onClick={markCorrect}>
-            <Check aria-hidden="true" size={17} />
-            Mark Correct
           </button>
           <button className="primary-action focus-ring" type="button" onClick={goNext}>
             {currentIndex >= sessionQuestions.length - 1 ? 'Finish' : 'Next Question'}
@@ -380,6 +435,7 @@ export function VoiceInterviewPage() {
     stopRecognition();
     setStatus('idle');
     setTranscript('');
+    setTypedAnswer('');
     setEvaluation(null);
     setAnswerVisible(false);
     setErrorMessage('');
@@ -402,7 +458,6 @@ export function VoiceInterviewPage() {
     questionId: string,
     outcome: VoiceResult['outcome'],
     resultTranscript: string,
-    correct: boolean,
   ) {
     setResults((current) => {
       const next = [
@@ -411,13 +466,13 @@ export function VoiceInterviewPage() {
       ];
       return next;
     });
-    recordAnswer(questionId, correct);
+    recordAnswer(questionId, outcome === 'correct');
   }
 }
 
 function getRecognitionErrorMessage(error: string) {
   if (error === 'not-allowed' || error === 'service-not-allowed') {
-    return 'Microphone access is blocked. Enable it in your browser settings or continue with self-grade Practice mode.';
+    return 'Microphone access is blocked. Enable it in your browser settings or switch to Type Answer for system-graded practice.';
   }
   if (error === 'no-speech') {
     return "I didn't hear an answer. Try again.";

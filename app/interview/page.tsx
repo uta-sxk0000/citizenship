@@ -4,7 +4,7 @@ import { VoiceInterviewPage } from '@/src/views/VoiceInterviewPage';
 export const metadata: Metadata = {
   title: 'Real Interview',
   description:
-    'Practice the U.S. citizenship civics questions by answering aloud with browser-based voice recognition.',
+    'Practice the U.S. citizenship civics questions with system-graded audio or typed interview answers.',
 };
 
 export default function Interview() {

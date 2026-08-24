@@ -32,7 +32,7 @@ export function HomePage() {
               Start Practice Interview
             </ButtonLink>
             <ButtonLink href="/interview" variant="secondary">
-              Real Interview Audio
+              Real Interview
             </ButtonLink>
           </div>
         </div>
@@ -77,9 +77,9 @@ export function HomePage() {
         <FeatureCard
           icon={<Mic aria-hidden="true" size={22} />}
           title="Real Interview"
-          description="Answer aloud and check key answer words with browser audio."
+          description="Answer aloud or type a response and let the system check key answer words."
           href="/interview"
-          action="Start Audio Interview"
+          action="Start Real Interview"
         />
         <FeatureCard
           icon={<RotateCcw aria-hidden="true" size={22} />}

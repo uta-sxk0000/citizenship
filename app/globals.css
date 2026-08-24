@@ -1174,6 +1174,43 @@ main {
   gap: 12px;
 }
 
+.typed-answer-panel {
+  display: grid;
+  gap: 12px;
+  width: min(620px, 100%);
+  margin: 0 auto;
+  text-align: left;
+}
+
+.typed-answer-panel label {
+  color: var(--muted-strong);
+  font-size: 0.9rem;
+  font-weight: 780;
+}
+
+.typed-answer-panel textarea {
+  width: 100%;
+  min-height: 118px;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--foreground);
+  padding: 14px 16px;
+  line-height: 1.6;
+  outline: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.typed-answer-panel textarea:focus {
+  border-color: color-mix(in srgb, var(--blue) 46%, var(--border));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 16%, transparent);
+}
+
+.typed-answer-panel .primary-action {
+  width: fit-content;
+}
+
 .mic-action {
   min-height: 50px;
   padding: 0 20px;
