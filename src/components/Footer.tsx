@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { USFlagMark } from '@/src/components/USFlagMark';
 
 export function Footer() {
@@ -15,18 +14,18 @@ export function Footer() {
           </div>
         </div>
         <nav className="footer-links" aria-label="Footer navigation">
-          <Link className="focus-ring" href="/">
+          <a className="focus-ring" href="/">
             Home
-          </Link>
-          <Link className="focus-ring" href="/study">
+          </a>
+          <a className="focus-ring" href="/study">
             Study All
-          </Link>
-          <Link className="focus-ring" href="/practice">
+          </a>
+          <a className="focus-ring" href="/practice">
             Practice
-          </Link>
-          <Link className="focus-ring" href="/progress">
+          </a>
+          <a className="focus-ring" href="/progress">
             Progress
-          </Link>
+          </a>
           <a
             className="focus-ring"
             href="https://www.uscis.gov/citizenship"

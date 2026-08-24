@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Languages, Menu, Moon, Search, Sun } from 'lucide-react';
 import { useState } from 'react';
@@ -26,31 +25,31 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <Link className="brand-lockup focus-ring" href="/">
+        <a className="brand-lockup focus-ring" href="/">
           <USFlagMark />
           <span>
             <strong>Citizenship Practice</strong>
             <small>Naturalization Interview Preparation</small>
           </span>
-        </Link>
+        </a>
 
         <nav className="desktop-nav" aria-label="Primary navigation">
           {navItems.map((item) => (
-            <Link
+            <a
               key={item.href}
               className={`nav-link focus-ring ${pathname === item.href ? 'is-active' : ''}`}
               href={item.href}
             >
               {item.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
         <div className="header-actions">
-          <Link className="icon-text-action focus-ring" href="/study" aria-label="Search questions">
+          <a className="icon-text-action focus-ring" href="/study" aria-label="Search questions">
             <Search aria-hidden="true" size={17} />
             <span>Search</span>
-          </Link>
+          </a>
           <button
             className="icon-action focus-ring"
             type="button"
@@ -89,14 +88,14 @@ export function Header() {
         <div id="mobile-menu" className="mobile-nav-panel">
           <nav className="mobile-nav" aria-label="Mobile navigation">
             {navItems.map((item) => (
-              <Link
+              <a
                 key={item.href}
                 className={`mobile-nav-link focus-ring ${pathname === item.href ? 'is-active' : ''}`}
                 href={item.href}
                 onClick={() => setOpen(false)}
               >
                 {item.label}
-              </Link>
+              </a>
             ))}
           </nav>
           <div className="mobile-nav-actions">

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
@@ -84,15 +83,15 @@ export function PracticePage() {
             <ResultStat label="Questions to Review" value={incorrectAnswers.length} />
           </div>
           <div className="result-actions">
-            <Link className="secondary-action focus-ring" href="/review?tab=incorrect">
+            <a className="secondary-action focus-ring" href="/review?tab=incorrect">
               Review Incorrect Questions
-            </Link>
+            </a>
             <button className="primary-action focus-ring" type="button" onClick={begin}>
               Practice Again
             </button>
-            <Link className="secondary-action focus-ring" href="/">
+            <a className="secondary-action focus-ring" href="/">
               Return Home
-            </Link>
+            </a>
           </div>
         </section>
       </div>

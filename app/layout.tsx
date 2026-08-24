@@ -1,10 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Footer } from '@/src/components/Footer';
 import { Header } from '@/src/components/Header';
+import { PWARegister } from '@/src/components/PWARegister';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://citizenship.khadkasagar.name.np'),
+  applicationName: 'Citizenship Practice',
+  manifest: '/manifest.webmanifest',
   title: {
     default: 'U.S. Citizenship Practice | Naturalization Interview Study',
     template: '%s | Citizenship Practice',
@@ -25,9 +28,19 @@ export const metadata: Metadata = {
     description:
       'Naturalization interview, civics, and pronunciation practice.',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Citizenship Practice',
+  },
   icons: {
     icon: '/favicon.svg',
+    apple: '/icons/icon-192.png',
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0b2a4a',
 };
 
 export default function RootLayout({
@@ -41,6 +54,7 @@ export default function RootLayout({
         <Header />
         <main>{children}</main>
         <Footer />
+        <PWARegister />
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ArrowRight, BookOpen, GraduationCap, ListChecks, RotateCcw } from 'lucide-react';
 import { ButtonLink } from '@/src/components/ButtonLink';
@@ -111,10 +110,10 @@ function FeatureCard({
       <div className="feature-icon">{icon}</div>
       <h2>{title}</h2>
       <p>{description}</p>
-      <Link className="feature-link focus-ring" href={href}>
+      <a className="feature-link focus-ring" href={href}>
         {action}
         <ArrowRight aria-hidden="true" size={16} />
-      </Link>
+      </a>
     </article>
   );
 }
