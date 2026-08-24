@@ -36,33 +36,37 @@ pnpm run build
 
 ## Deployment
 
-The default scripts are configured for Vercel / Next.js deployment. The production deployment can be connected to:
+The default scripts are configured for Cloudflare Workers deployment with Wrangler. The production deployment can be connected to:
 
 ```text
 citizenship.khadkasagar.name.np
 ```
 
-Vercel settings:
+Cloudflare settings:
 
 ```text
-Framework: Next.js
+Build system version: v2
 Install command: pnpm install --frozen-lockfile
 Build command: pnpm run build
-Output directory: .next
+Deploy command: pnpm run deploy
 ```
 
-Local build command:
+Local Cloudflare build:
 
 ```bash
 pnpm run build
 ```
 
-The app also keeps Vinext/OpenAI Sites scripts available for the existing Sites deployment:
+The root `wrangler.jsonc` deploys the generated Worker entry at `dist/server/index.js` and static assets from `dist/client`.
+
+To use `citizenship.khadkasagar.name.np`, add it as a custom domain for the deployed Worker in Cloudflare after the first successful deploy.
+
+Vercel is still available through explicit scripts if you decide to use it later:
 
 ```bash
-pnpm run dev:sites
-pnpm run build:sites
-pnpm run start:sites
+pnpm run dev:vercel
+pnpm run build:vercel
+pnpm run start:vercel
 ```
 
 The app uses route files for `/`, `/study`, `/practice`, `/review`, and `/progress`.
