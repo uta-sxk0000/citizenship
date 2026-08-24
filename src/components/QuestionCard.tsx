@@ -1,6 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import {
+  Bookmark,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Languages,
+  RotateCcw,
+} from 'lucide-react';
 import { SpeechButton } from '@/src/components/SpeechButton';
 import type { CitizenshipQuestion } from '@/src/types/question';
 
@@ -9,7 +17,11 @@ interface QuestionCardProps {
   position: number;
   total: number;
   isFavorite: boolean;
-  showNepaliByDefault: boolean;
+  showNepaliByDefault?: boolean;
+  answerVisible?: boolean;
+  questionOnly?: boolean;
+  showNavigation?: boolean;
+  onAnswerVisibleChange?: (visible: boolean) => void;
   onKnow: (id: string) => void;
   onNeedPractice: (id: string) => void;
   onToggleFavorite: (id: string) => void;
@@ -25,7 +37,11 @@ export function QuestionCard({
   position,
   total,
   isFavorite,
-  showNepaliByDefault,
+  showNepaliByDefault = false,
+  answerVisible,
+  questionOnly = false,
+  showNavigation = true,
+  onAnswerVisibleChange,
   onKnow,
   onNeedPractice,
   onToggleFavorite,
@@ -35,157 +51,191 @@ export function QuestionCard({
   canNext = true,
   primaryActionLabel = 'I Know This',
 }: QuestionCardProps) {
-  const [answerVisible, setAnswerVisible] = useState(false);
+  const [internalAnswerVisible, setInternalAnswerVisible] = useState(false);
   const [nepaliVisible, setNepaliVisible] = useState(showNepaliByDefault);
+  const resolvedAnswerVisible = questionOnly
+    ? false
+    : answerVisible ?? internalAnswerVisible;
   const hasNepali = Boolean(question.nepaliQuestion || question.nepaliAnswers?.length);
-  const answerText = useMemo(() => question.answers.join('. '), [question.answers]);
+  const setAnswerVisible = (visible: boolean) => {
+    if (onAnswerVisibleChange) {
+      onAnswerVisibleChange(visible);
+    } else {
+      setInternalAnswerVisible(visible);
+    }
+  };
 
   return (
-    <article className="card grid gap-6 p-5 sm:p-7" aria-labelledby={`question-${question.id}`}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <article
+      id={`question-${question.number ?? position}`}
+      className="question-card"
+      aria-labelledby={`question-title-${question.id}`}
+    >
+      <div className="question-card-topline" />
+      <header className="question-card-header">
         <div>
-          <p className="text-sm font900 text-[var(--red)]">Question {question.number ?? position}</p>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            {position} / {total} · {question.category}
-            {question.subcategory ? ` · ${question.subcategory}` : ''}
+          <p className="question-kicker">Question {question.number ?? position}</p>
+          <p className="question-meta">
+            {question.subcategory ?? question.category} · {position} / {total}
           </p>
         </div>
-        {question.sample ? (
-          <span className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-1 text-xs font900 text-[var(--muted-strong)]">
-            Sample data
-          </span>
-        ) : null}
-      </div>
+        <div className="question-badges" aria-label="Question notes">
+          {question.specialConsideration ? <span>65/20</span> : null}
+          {question.currentAnswer ? (
+            <span>Current answer</span>
+          ) : null}
+          {!question.currentAnswer && question.variableAnswer ? <span>Variable answer</span> : null}
+        </div>
+      </header>
 
-      <div className="grid gap-4">
-        <h2
-          id={`question-${question.id}`}
-          className="text-2xl font900 leading-snug text-[var(--foreground)] sm:text-3xl"
-        >
-          {question.question}
-        </h2>
-        {question.currentAnswer ? (
-          <p className="rounded-md border border-[color-mix(in_srgb,var(--red)_35%,var(--border))] bg-[color-mix(in_srgb,var(--red)_9%,var(--surface))] px-3 py-2 text-sm font800 text-[var(--red)]">
-            Current answer - verify before your interview.
-          </p>
-        ) : null}
-        <div className="flex flex-wrap gap-2">
-          <SpeechButton label="Listen" text={question.question} />
-          <SpeechButton label="Listen Slowly" rate={0.7} text={question.question} />
+      <div className="question-line">
+        <h2 id={`question-title-${question.id}`}>{question.question}</h2>
+        <div className="audio-cluster" aria-label="Question audio controls">
+          <SpeechButton label="Listen to question" text={question.question} variant="primary" />
+          <SpeechButton
+            label="Listen to question slowly"
+            rate={0.7}
+            slow
+            text={question.question}
+            variant="ghost"
+          />
         </div>
       </div>
 
-      <div className="grid gap-4 border-t border-[var(--border)] pt-5">
-        {!answerVisible ? (
+      {question.currentAnswer || question.variableAnswer ? (
+        <p className="current-answer-note">
+          Verify this answer before your interview.
+        </p>
+      ) : null}
+
+      <div className="question-answer-region">
+        {!resolvedAnswerVisible ? (
           <button
-            className="focus-ring min-h-12 rounded-md bg-[var(--navy)] px-4 py-3 text-sm font900 text-white hover:bg-[var(--navy-strong)]"
+            className="primary-action focus-ring"
             type="button"
+            disabled={questionOnly}
             onClick={() => setAnswerVisible(true)}
           >
             Show Answer
           </button>
         ) : (
-          <section className="grid gap-4" aria-label="Answer">
-            <div>
-              <h3 className="text-lg font900 text-[var(--navy-strong)]">Answer</h3>
-              <ul className="mt-2 grid gap-2 text-lg font800 leading-7">
-                {question.answers.map((answer) => (
-                  <li key={answer}>{answer}</li>
-                ))}
-              </ul>
+          <section className="answer-panel" aria-label="Answer">
+            <div className="answer-heading">
+              <div>
+                <p>Answer</p>
+                {question.answerInstruction ? <span>{question.answerInstruction}</span> : null}
+              </div>
             </div>
+            <ul className="answer-list">
+              {question.answers.map((answer) => (
+                <li key={answer}>
+                  <span>{answer}</span>
+                  <div className="audio-cluster answer-audio" aria-label="Answer audio controls">
+                    <SpeechButton label={`Listen to answer: ${answer}`} text={answer} />
+                    <SpeechButton
+                      label={`Listen slowly to answer: ${answer}`}
+                      rate={0.7}
+                      slow
+                      text={answer}
+                      variant="ghost"
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {question.note ? <p className="question-note">{question.note}</p> : null}
             {question.explanation ? (
-              <p className="text-sm leading-6 text-[var(--muted)]">{question.explanation}</p>
+              <p className="question-note">{question.explanation}</p>
             ) : null}
-            <div className="flex flex-wrap gap-2">
-              <SpeechButton label="Listen to Answer" text={answerText} />
-              <SpeechButton label="Listen Slowly" rate={0.7} text={answerText} />
-            </div>
           </section>
         )}
       </div>
 
       {hasNepali ? (
-        <div className="grid gap-3 border-t border-[var(--border)] pt-5">
+        <div className="nepali-region">
           <button
-            className="focus-ring w-fit rounded-md border border-[var(--border)] px-3 py-2 text-sm font800 text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]"
+            className="quiet-action focus-ring"
             type="button"
             aria-expanded={nepaliVisible}
             onClick={() => setNepaliVisible((value) => !value)}
           >
-            {nepaliVisible ? 'Hide Nepali Translation' : 'Translate to Nepali'}
+            <Languages aria-hidden="true" size={16} />
+            नेपाली
           </button>
           {nepaliVisible ? (
-            <section className="rounded-md bg-[var(--surface-muted)] p-4" aria-label="Nepali translation">
+            <section className="nepali-panel" aria-label="Nepali translation">
               {question.nepaliQuestion ? (
-                <>
-                  <h3 className="font900 text-[var(--navy-strong)]">नेपाली</h3>
-                  <p className="mt-2 text-lg font800 leading-8">{question.nepaliQuestion}</p>
-                </>
+                <p>
+                  <strong>नेपाली:</strong> {question.nepaliQuestion}
+                </p>
               ) : null}
               {question.nepaliAnswers?.length ? (
-                <div className="mt-4">
-                  <h4 className="font900 text-[var(--navy-strong)]">उत्तर</h4>
-                  <ul className="mt-2 grid gap-2 text-lg font800 leading-8">
-                    {question.nepaliAnswers.map((answer) => (
-                      <li key={answer}>{answer}</li>
-                    ))}
-                  </ul>
-                </div>
+                <p>
+                  <strong>उत्तर:</strong> {question.nepaliAnswers.join(' · ')}
+                </p>
               ) : null}
             </section>
           ) : null}
         </div>
       ) : null}
 
-      <div className="grid gap-4 border-t border-[var(--border)] pt-5">
-        <div className="grid gap-2 sm:grid-cols-3">
+      <footer className="question-actions">
+        <div className="action-group">
           <button
-            className="focus-ring min-h-12 rounded-md bg-[var(--green)] px-4 py-3 text-sm font900 text-white hover:brightness-95"
+            className="success-action focus-ring"
             type="button"
             onClick={() => onKnow(question.id)}
           >
+            <Check aria-hidden="true" size={17} />
             {primaryActionLabel}
           </button>
           <button
-            className="focus-ring min-h-12 rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 text-[var(--red)] hover:bg-[var(--surface-muted)]"
+            className="secondary-action focus-ring"
             type="button"
             onClick={() => onNeedPractice(question.id)}
           >
+            <RotateCcw aria-hidden="true" size={16} />
             Need Practice
           </button>
           <button
-            className="focus-ring min-h-12 rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 text-[var(--navy-strong)] hover:bg-[var(--surface-muted)]"
+            className="secondary-action focus-ring"
             type="button"
             aria-pressed={isFavorite}
             onClick={() => onToggleFavorite(question.id)}
           >
-            {isFavorite ? 'Favorited' : 'Favorite'}
+            <Bookmark aria-hidden="true" size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+            {isFavorite ? 'Saved' : 'Save'}
           </button>
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <button
-            className="focus-ring min-h-11 rounded-md border border-[var(--border)] px-4 py-2 text-sm font800 disabled:opacity-45"
-            type="button"
-            disabled={!canPrevious}
-            onClick={onPrevious}
-          >
-            Previous
-          </button>
-          <span className="text-sm font900 text-[var(--muted-strong)]">
-            {position} / {total}
-          </span>
-          <button
-            className="focus-ring min-h-11 rounded-md border border-[var(--border)] px-4 py-2 text-sm font800 disabled:opacity-45"
-            type="button"
-            disabled={!canNext}
-            onClick={onNext}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+        {showNavigation ? (
+          <div className="card-nav">
+            <button
+              className="nav-action focus-ring"
+              type="button"
+              disabled={!canPrevious}
+              onClick={onPrevious}
+              aria-label="Previous question"
+            >
+              <ChevronLeft aria-hidden="true" size={18} />
+              Previous
+            </button>
+            <span>
+              {position} / {total}
+            </span>
+            <button
+              className="nav-action focus-ring"
+              type="button"
+              disabled={!canNext}
+              onClick={onNext}
+              aria-label="Next question"
+            >
+              Next
+              <ChevronRight aria-hidden="true" size={18} />
+            </button>
+          </div>
+        ) : null}
+      </footer>
     </article>
   );
 }

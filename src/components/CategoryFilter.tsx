@@ -10,15 +10,11 @@ export function CategoryFilter({
   onChange,
 }: CategoryFilterProps) {
   return (
-    <div className="flex flex-wrap gap-2" role="list" aria-label="Question filters">
+    <div className="category-filter" role="list" aria-label="Question filters">
       {filters.map((filter) => (
         <button
           key={filter}
-          className={`focus-ring min-h-10 rounded-md border px-3 py-2 text-sm font800 ${
-            activeFilter === filter
-              ? 'border-[var(--navy)] bg-[var(--navy)] text-white'
-              : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]'
-          }`}
+          className={`segmented-button focus-ring ${activeFilter === filter ? 'is-active' : ''}`}
           type="button"
           aria-pressed={activeFilter === filter}
           onClick={() => onChange(filter)}

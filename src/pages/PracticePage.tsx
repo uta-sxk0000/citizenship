@@ -3,18 +3,21 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
+import { Check, X } from 'lucide-react';
 import { EmptyState } from '@/src/components/EmptyState';
+import { ProgressBar } from '@/src/components/ProgressBar';
 import { SpeechButton } from '@/src/components/SpeechButton';
-import { questions } from '@/src/data/questions';
+import { USFlagMark } from '@/src/components/USFlagMark';
+import { questionSetMeta, questions } from '@/src/data/questions';
 import { useProgress, type PracticeAnswer } from '@/src/hooks/useProgress';
 import type { CitizenshipQuestion } from '@/src/types/question';
 
 type QuestionCount = 5 | 10 | 20 | 'all';
 type QuestionOrder = 'random' | 'in-order';
-type PracticeFilter = 'all' | 'civics' | 'n400' | 'vocabulary';
+type PracticeFilter = 'all' | 'American Government' | 'American History' | 'Symbols and Holidays';
 
 export function PracticePage() {
-  const [count, setCount] = useState<QuestionCount>(10);
+  const [count, setCount] = useState<QuestionCount>(20);
   const [filter, setFilter] = useState<PracticeFilter>('all');
   const [order, setOrder] = useState<QuestionOrder>('random');
   const [sessionQuestions, setSessionQuestions] = useState<CitizenshipQuestion[]>([]);
@@ -68,37 +71,26 @@ export function PracticePage() {
 
     return (
       <div className="page-shell">
-        <section className="card mx-auto grid max-w-2xl gap-6 p-6 text-center">
-          <div className="grid gap-2">
-            <p className="eyebrow">Practice Complete</p>
-            <h1 className="text-4xl font900 text-[var(--navy-strong)]">
-              {score} / {sessionQuestions.length} Correct
-            </h1>
-            <p className="text-2xl font900 text-[var(--blue)]">{percentage}%</p>
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-left">
+        <section className="result-panel">
+          <p className="section-label">
+            <USFlagMark />
+            Practice Complete
+          </p>
+          <h1>{score} / {sessionQuestions.length} Correct</h1>
+          <ProgressBar label="Session score" value={score} max={sessionQuestions.length} detail={`${percentage}%`} />
+          <div className="result-stat-grid">
             <ResultStat label="Correct" value={score} />
             <ResultStat label="Incorrect" value={sessionQuestions.length - score} />
             <ResultStat label="Questions to Review" value={incorrectAnswers.length} />
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Link
-              className="focus-ring rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 hover:bg-[var(--surface-muted)]"
-              href="/review?tab=incorrect"
-            >
+          <div className="result-actions">
+            <Link className="secondary-action focus-ring" href="/review?tab=incorrect">
               Review Incorrect Questions
             </Link>
-            <button
-              className="focus-ring rounded-md bg-[var(--navy)] px-4 py-3 text-sm font900 text-white hover:bg-[var(--navy-strong)]"
-              type="button"
-              onClick={begin}
-            >
+            <button className="primary-action focus-ring" type="button" onClick={begin}>
               Practice Again
             </button>
-            <Link
-              className="focus-ring rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 hover:bg-[var(--surface-muted)]"
-              href="/"
-            >
+            <Link className="secondary-action focus-ring" href="/">
               Return Home
             </Link>
           </div>
@@ -109,16 +101,20 @@ export function PracticePage() {
 
   if (sessionQuestions.length === 0) {
     return (
-      <div className="page-shell">
+      <div className="page-shell practice-shell">
         <div className="page-heading">
-          <p className="eyebrow">Mock interview</p>
-          <h1 className="text-3xl font900 text-[var(--navy-strong)]">Practice Interview</h1>
-          <p className="max-w-3xl text-base leading-7 text-[var(--muted)]">
-            Choose a short session, listen to each question, answer out loud, then mark how you did.
+          <p className="section-label">
+            <USFlagMark />
+            Practice Interview
+          </p>
+          <h1>Practice Interview</h1>
+          <p>
+            Choose a focused session from the {questionSetMeta.totalQuestions}-question civics set. Answer out loud,
+            reveal the accepted answer, then mark how you did.
           </p>
         </div>
 
-        <section className="card grid gap-6 p-5">
+        <section className="settings-panel">
           <SettingGroup label="Number of Questions">
             <SegmentedButton active={count === 5} onClick={() => setCount(5)}>
               5
@@ -130,25 +126,31 @@ export function PracticePage() {
               20
             </SegmentedButton>
             <SegmentedButton active={count === 'all'} onClick={() => setCount('all')}>
-              All
+              All 128
             </SegmentedButton>
           </SettingGroup>
 
-          <SettingGroup label="Question Type">
+          <SettingGroup label="Question Category">
             <SegmentedButton active={filter === 'all'} onClick={() => setFilter('all')}>
               All Questions
             </SegmentedButton>
-            <SegmentedButton active={filter === 'civics'} onClick={() => setFilter('civics')}>
-              Civics
-            </SegmentedButton>
-            <SegmentedButton active={filter === 'n400'} onClick={() => setFilter('n400')}>
-              N-400
+            <SegmentedButton
+              active={filter === 'American Government'}
+              onClick={() => setFilter('American Government')}
+            >
+              Government
             </SegmentedButton>
             <SegmentedButton
-              active={filter === 'vocabulary'}
-              onClick={() => setFilter('vocabulary')}
+              active={filter === 'American History'}
+              onClick={() => setFilter('American History')}
             >
-              Vocabulary
+              History
+            </SegmentedButton>
+            <SegmentedButton
+              active={filter === 'Symbols and Holidays'}
+              onClick={() => setFilter('Symbols and Holidays')}
+            >
+              Symbols & Holidays
             </SegmentedButton>
           </SettingGroup>
 
@@ -164,14 +166,10 @@ export function PracticePage() {
           {pool.length === 0 ? (
             <EmptyState
               title="No questions loaded"
-              description="Add matching questions to src/data/questions.ts before beginning this practice mode."
+              description="Choose another category or check the question dataset."
             />
           ) : (
-            <button
-              className="focus-ring min-h-12 rounded-md bg-[var(--navy)] px-5 py-3 text-sm font900 text-white hover:bg-[var(--navy-strong)]"
-              type="button"
-              onClick={begin}
-            >
+            <button className="primary-action focus-ring" type="button" onClick={begin}>
               Begin Interview
             </button>
           )}
@@ -185,7 +183,7 @@ export function PracticePage() {
       <div className="page-shell">
         <EmptyState
           title="No questions loaded"
-          description="Add questions to src/data/questions.ts to begin interview practice."
+          description="The interview session could not find a current question."
         />
       </div>
     );
@@ -193,68 +191,58 @@ export function PracticePage() {
 
   return (
     <div className="page-shell">
-      <section className="card mx-auto grid max-w-3xl gap-6 p-5 sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="eyebrow">Interview Question {currentIndex + 1}</p>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              {currentIndex + 1} / {sessionQuestions.length}
-            </p>
-          </div>
-          <span className="rounded-md bg-[var(--surface-muted)] px-3 py-1 text-sm font900 text-[var(--muted-strong)]">
-            {currentQuestion.category}
-          </span>
-        </div>
-
-        <h1 className="text-3xl font900 leading-snug text-[var(--foreground)]">
-          {currentQuestion.question}
-        </h1>
-
-        <div className="flex flex-wrap gap-2">
-          <SpeechButton label="Repeat Question" text={currentQuestion.question} tone="solid" />
+      <section className="interview-card">
+        <p className="section-label">
+          <USFlagMark />
+          Practice Interview
+        </p>
+        <p className="interview-count">Question {currentIndex + 1} of {sessionQuestions.length}</p>
+        <h1>{currentQuestion.question}</h1>
+        <div className="interview-audio">
+          <SpeechButton label="Listen to interview question" text={currentQuestion.question} variant="primary" />
           <SpeechButton
-            label="Repeat Slowly"
+            label="Listen to interview question slowly"
             rate={0.7}
+            slow
             text={currentQuestion.question}
+            variant="ghost"
           />
         </div>
 
         {!answerVisible ? (
           <button
-            className="focus-ring min-h-12 rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 hover:bg-[var(--surface-muted)]"
+            className="primary-action focus-ring"
             type="button"
             onClick={() => setAnswerVisible(true)}
           >
             Show Correct Answer
           </button>
         ) : (
-          <section className="grid gap-4 border-t border-[var(--border)] pt-5">
-            <div>
-              <h2 className="text-lg font900 text-[var(--navy-strong)]">Correct Answer</h2>
-              <ul className="mt-2 grid gap-2 text-lg font800 leading-7">
-                {currentQuestion.answers.map((answer) => (
-                  <li key={answer}>{answer}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="grid gap-3">
-              <p className="text-sm font900 text-[var(--muted-strong)]">How did you do?</p>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button
-                  className="focus-ring min-h-12 rounded-md bg-[var(--green)] px-4 py-3 text-sm font900 text-white hover:brightness-95"
-                  type="button"
-                  onClick={() => scoreQuestion(true)}
-                >
-                  Correct
-                </button>
-                <button
-                  className="focus-ring min-h-12 rounded-md border border-[var(--border)] px-4 py-3 text-sm font900 text-[var(--red)] hover:bg-[var(--surface-muted)]"
-                  type="button"
-                  onClick={() => scoreQuestion(false)}
-                >
-                  Incorrect
-                </button>
-              </div>
+          <section className="interview-answer">
+            <p>{currentQuestion.answerInstruction ?? 'Accepted answer.'}</p>
+            <ul>
+              {currentQuestion.answers.map((answer) => (
+                <li key={answer}>{answer}</li>
+              ))}
+            </ul>
+            {currentQuestion.note ? <span>{currentQuestion.note}</span> : null}
+            <div className="interview-score-actions">
+              <button
+                className="success-action focus-ring"
+                type="button"
+                onClick={() => scoreQuestion(true)}
+              >
+                <Check aria-hidden="true" size={18} />
+                Correct
+              </button>
+              <button
+                className="secondary-action danger focus-ring"
+                type="button"
+                onClick={() => scoreQuestion(false)}
+              >
+                <X aria-hidden="true" size={18} />
+                Need Practice
+              </button>
             </div>
           </section>
         )}
@@ -268,11 +256,7 @@ function filterQuestions(filter: PracticeFilter) {
     return questions;
   }
 
-  if (filter === 'n400') {
-    return questions.filter((question) => question.type === 'n400' || question.type === 'yes-no');
-  }
-
-  return questions.filter((question) => question.type === filter);
+  return questions.filter((question) => question.category === filter);
 }
 
 function shuffle<T>(items: T[]) {
@@ -281,9 +265,9 @@ function shuffle<T>(items: T[]) {
 
 function SettingGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <fieldset className="grid gap-3">
-      <legend className="text-sm font900 text-[var(--muted-strong)]">{label}</legend>
-      <div className="flex flex-wrap gap-2">{children}</div>
+    <fieldset className="setting-group">
+      <legend>{label}</legend>
+      <div>{children}</div>
     </fieldset>
   );
 }
@@ -299,11 +283,7 @@ function SegmentedButton({
 }) {
   return (
     <button
-      className={`focus-ring min-h-11 rounded-md border px-4 py-2 text-sm font900 ${
-        active
-          ? 'border-[var(--navy)] bg-[var(--navy)] text-white'
-          : 'border-[var(--border)] bg-[var(--surface)] text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]'
-      }`}
+      className={`segmented-button focus-ring ${active ? 'is-active' : ''}`}
       type="button"
       aria-pressed={active}
       onClick={onClick}
@@ -315,9 +295,9 @@ function SegmentedButton({
 
 function ResultStat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md border border-[var(--border)] bg-[var(--surface-muted)] p-4">
-      <p className="text-sm font800 text-[var(--muted)]">{label}</p>
-      <p className="mt-2 text-2xl font900 text-[var(--navy-strong)]">{value}</p>
+    <div className="result-stat">
+      <strong>{value}</strong>
+      <span>{label}</span>
     </div>
   );
 }

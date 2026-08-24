@@ -1,5 +1,5 @@
 import { questions } from '@/src/data/questions';
-import { questionTypeLabels, type CitizenshipQuestion } from '@/src/types/question';
+import type { CitizenshipQuestion } from '@/src/types/question';
 
 export const allQuestions = questions;
 
@@ -10,9 +10,6 @@ export function getQuestionFilters(list: CitizenshipQuestion[] = questions) {
     values.add(question.category);
     if (question.subcategory) {
       values.add(question.subcategory);
-    }
-    if (question.type) {
-      values.add(questionTypeLabels[question.type]);
     }
   }
 
@@ -28,8 +25,6 @@ export function matchesQuestionFilter(question: CitizenshipQuestion, filter: str
   const possibleValues = [
     question.category,
     question.subcategory,
-    question.type ? questionTypeLabels[question.type] : undefined,
-    question.type,
   ];
 
   return possibleValues.some((value) => value && normalize(value) === normalizedFilter);
@@ -58,12 +53,38 @@ export function searchQuestions(
       question.category,
       question.subcategory ?? '',
       question.explanation ?? '',
+      question.note ?? '',
+      question.answerInstruction ?? '',
     ]
       .join(' ')
       .toLowerCase();
 
     return haystack.includes(term);
   });
+}
+
+export function groupQuestionsBySection(list: CitizenshipQuestion[]) {
+  const groups: {
+    category: string;
+    subcategory: string;
+    questions: CitizenshipQuestion[];
+  }[] = [];
+
+  for (const question of list) {
+    const subcategory = question.subcategory ?? 'General';
+    const last = groups[groups.length - 1];
+    if (!last || last.category !== question.category || last.subcategory !== subcategory) {
+      groups.push({
+        category: question.category,
+        subcategory,
+        questions: [question],
+      });
+    } else {
+      last.questions.push(question);
+    }
+  }
+
+  return groups;
 }
 
 export function getQuestionById(id: string | null) {

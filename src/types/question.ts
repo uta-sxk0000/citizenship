@@ -13,13 +13,18 @@ export interface CitizenshipQuestion {
   subcategory?: string;
   question: string;
   answers: string[];
+  answerInstruction?: string;
   nepaliQuestion?: string;
   nepaliAnswers?: string[];
   explanation?: string;
   nepaliExplanation?: string;
+  note?: string;
   acceptedAnswers?: string[];
   type?: QuestionType;
+  sourcePage?: number;
   currentAnswer?: boolean;
+  variableAnswer?: boolean;
+  specialConsideration?: boolean;
   important?: boolean;
   sample?: boolean;
 }

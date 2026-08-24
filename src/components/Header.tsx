@@ -2,13 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Languages, Menu, Moon, Search, Sun } from 'lucide-react';
 import { useState } from 'react';
+import { USFlagMark } from '@/src/components/USFlagMark';
 import { useProgress } from '@/src/hooks/useProgress';
 import type { ThemePreference } from '@/src/utils/storage';
 
 const navItems = [
   { href: '/', label: 'Home' },
-  { href: '/study', label: 'Study' },
+  { href: '/study', label: 'Study All' },
   { href: '/practice', label: 'Practice' },
   { href: '/review', label: 'Review' },
   { href: '/progress', label: 'Progress' },
@@ -19,26 +21,24 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const { progress, setTheme, setShowNepali } = useProgress();
   const nextTheme = getNextTheme(progress.preferences.theme);
+  const ThemeIcon = progress.preferences.theme === 'dark' ? Moon : Sun;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[color-mix(in_srgb,var(--surface)_94%,transparent)] backdrop-blur">
-      <div className="mx-auto flex w-[min(1120px,calc(100%-32px))] items-center justify-between gap-4 py-3">
-        <Link className="focus-ring grid min-w-0 gap-0.5 rounded-md" href="/">
-          <span className="text-base font900 text-[var(--navy-strong)]">Citizenship Practice</span>
-          <span className="hidden text-xs text-[var(--muted)] sm:block">
-            U.S. Naturalization Interview Preparation
+    <header className="site-header">
+      <div className="site-header-inner">
+        <Link className="brand-lockup focus-ring" href="/">
+          <USFlagMark />
+          <span>
+            <strong>Citizenship Practice</strong>
+            <small>Naturalization Interview Preparation</small>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex" aria-label="Primary navigation">
+        <nav className="desktop-nav" aria-label="Primary navigation">
           {navItems.map((item) => (
             <Link
               key={item.href}
-              className={`focus-ring rounded-md px-3 py-2 text-sm font800 ${
-                pathname === item.href
-                  ? 'bg-[var(--surface-muted)] text-[var(--navy-strong)]'
-                  : 'text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]'
-              }`}
+              className={`nav-link focus-ring ${pathname === item.href ? 'is-active' : ''}`}
               href={item.href}
             >
               {item.label}
@@ -46,50 +46,52 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="header-actions">
+          <Link className="icon-text-action focus-ring" href="/study" aria-label="Search questions">
+            <Search aria-hidden="true" size={17} />
+            <span>Search</span>
+          </Link>
           <button
-            className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 text-sm font800 text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]"
+            className="icon-action focus-ring"
             type="button"
+            aria-label="Toggle Nepali translations"
             aria-pressed={progress.preferences.showNepali}
             onClick={() => setShowNepali(!progress.preferences.showNepali)}
+            title="Nepali"
           >
-            {progress.preferences.showNepali ? 'नेपाली On' : 'EN / नेपाली'}
+            <Languages aria-hidden="true" size={17} />
           </button>
           <button
-            className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 text-sm font800 text-[var(--muted-strong)] hover:bg-[var(--surface-muted)]"
+            className="icon-action focus-ring"
             type="button"
             aria-label={`Switch theme to ${nextTheme}`}
             onClick={() => setTheme(nextTheme)}
+            title={`Theme: ${themeLabel[progress.preferences.theme]}`}
           >
-            Theme: {themeLabel[progress.preferences.theme]}
+            <ThemeIcon aria-hidden="true" size={17} />
           </button>
         </div>
 
         <button
-          className="focus-ring rounded-md border border-[var(--border)] px-3 py-2 text-sm font800 md:hidden"
+          className="mobile-menu-button focus-ring"
           type="button"
+          aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((value) => !value)}
         >
+          <Menu aria-hidden="true" size={20} />
           Menu
         </button>
       </div>
 
       {open ? (
-        <div
-          id="mobile-menu"
-          className="border-t border-[var(--border)] bg-[var(--surface)] px-4 pb-4 md:hidden"
-        >
-          <nav className="grid gap-1 py-3" aria-label="Mobile navigation">
+        <div id="mobile-menu" className="mobile-nav-panel">
+          <nav className="mobile-nav" aria-label="Mobile navigation">
             {navItems.map((item) => (
               <Link
                 key={item.href}
-                className={`focus-ring rounded-md px-3 py-3 text-sm font800 ${
-                  pathname === item.href
-                    ? 'bg-[var(--surface-muted)] text-[var(--navy-strong)]'
-                    : 'text-[var(--muted-strong)]'
-                }`}
+                className={`mobile-nav-link focus-ring ${pathname === item.href ? 'is-active' : ''}`}
                 href={item.href}
                 onClick={() => setOpen(false)}
               >
@@ -97,21 +99,22 @@ export function Header() {
               </Link>
             ))}
           </nav>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="mobile-nav-actions">
             <button
-              className="focus-ring rounded-md border border-[var(--border)] px-3 py-3 text-sm font800"
+              className="secondary-action focus-ring"
               type="button"
               aria-pressed={progress.preferences.showNepali}
               onClick={() => setShowNepali(!progress.preferences.showNepali)}
             >
-              {progress.preferences.showNepali ? 'नेपाली On' : 'EN / नेपाली'}
+              <Languages aria-hidden="true" size={16} />
+              नेपाली
             </button>
             <button
-              className="focus-ring rounded-md border border-[var(--border)] px-3 py-3 text-sm font800"
+              className="secondary-action focus-ring"
               type="button"
-              aria-label={`Switch theme to ${nextTheme}`}
               onClick={() => setTheme(nextTheme)}
             >
+              <ThemeIcon aria-hidden="true" size={16} />
               {themeLabel[progress.preferences.theme]}
             </button>
           </div>

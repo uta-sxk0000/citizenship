@@ -1,16 +1,24 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Gauge, Volume2, VolumeX } from 'lucide-react';
 import { prepareVoices, speakText, supportsSpeech } from '@/src/utils/speech';
 
 interface SpeechButtonProps {
   text: string;
   label: string;
   rate?: number;
-  tone?: 'light' | 'solid';
+  variant?: 'primary' | 'subtle' | 'ghost';
+  slow?: boolean;
 }
 
-export function SpeechButton({ text, label, rate = 0.95, tone = 'light' }: SpeechButtonProps) {
+export function SpeechButton({
+  text,
+  label,
+  rate = 0.95,
+  variant = 'subtle',
+  slow = false,
+}: SpeechButtonProps) {
   const [available, setAvailable] = useState(false);
   const [playing, setPlaying] = useState(false);
 
@@ -37,21 +45,19 @@ export function SpeechButton({ text, label, rate = 0.95, tone = 'light' }: Speec
     }
   };
 
+  const Icon = !available ? VolumeX : slow ? Gauge : Volume2;
+
   return (
     <button
-      className={`focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font800 ${
-        tone === 'solid'
-          ? 'bg-[var(--navy)] text-white hover:bg-[var(--navy-strong)]'
-          : 'border border-[var(--border)] bg-[var(--surface)] text-[var(--navy-strong)] hover:bg-[var(--surface-muted)]'
-      } ${playing ? 'ring-2 ring-[color-mix(in_srgb,var(--blue)_35%,transparent)]' : ''}`}
+      className={`audio-button audio-button-${variant} focus-ring ${playing ? 'is-playing' : ''}`}
       type="button"
       disabled={!available}
       aria-label={available ? label : 'Speech is not available in this browser'}
       aria-pressed={playing}
       onClick={startSpeech}
+      title={label}
     >
-      <span aria-hidden="true">Audio</span>
-      <span>{playing ? 'Playing' : label}</span>
+      <Icon aria-hidden="true" size={18} strokeWidth={2.2} />
     </button>
   );
 }
