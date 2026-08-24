@@ -225,6 +225,10 @@ function buildVariants(answer: string) {
       variants.add(tokens.slice(1).join(' '));
     }
 
+    if (tokens[0] === 'free' && tokens.length > 1) {
+      variants.add(tokens.slice(1).join(' '));
+    }
+
     if (tokens.length === 2 && allowedTailVariants.has(tokens[1])) {
       variants.add(tokens[1]);
     }
@@ -238,6 +242,8 @@ function answerMatchesTranscript(variants: string[], normalizedTranscript: strin
     return false;
   }
 
+  const transcriptTokens = normalizedTranscript.split(' ').filter(Boolean);
+
   for (const variant of variants) {
     if (containsPhrase(normalizedTranscript, variant)) {
       return true;
@@ -250,9 +256,9 @@ function answerMatchesTranscript(variants: string[], normalizedTranscript: strin
       return false;
     }
     if (tokens.length <= 3) {
-      return tokens.every((token) => containsPhrase(normalizedTranscript, token));
+      return tokens.every((token) => tokenAppearsInTranscript(transcriptTokens, token));
     }
-    const found = tokens.filter((token) => containsPhrase(normalizedTranscript, token)).length;
+    const found = tokens.filter((token) => tokenAppearsInTranscript(transcriptTokens, token)).length;
     return found >= Math.ceil(tokens.length * 0.75);
   });
 }
@@ -267,4 +273,65 @@ function importantTokens(value: string) {
 function containsPhrase(normalizedTranscript: string, normalizedPhrase: string) {
   const phrase = normalizedPhrase.trim();
   return phrase.length > 0 && ` ${normalizedTranscript} `.includes(` ${phrase} `);
+}
+
+function tokenAppearsInTranscript(transcriptTokens: string[], expected: string) {
+  return transcriptTokens.some((candidate) => tokensMatch(candidate, expected));
+}
+
+function tokensMatch(candidate: string, expected: string) {
+  if (candidate === expected) {
+    return true;
+  }
+
+  if (stemToken(candidate) === stemToken(expected)) {
+    return true;
+  }
+
+  if (expected.length < 6 || candidate.length < 5) {
+    return false;
+  }
+
+  const maxDistance = expected.length >= 7 ? 2 : 1;
+  return levenshteinDistance(candidate, expected) <= maxDistance;
+}
+
+function stemToken(token: string) {
+  if (token.length > 5 && token.endsWith('ing')) {
+    return token.slice(0, -3);
+  }
+  if (token.length > 4 && token.endsWith('ed')) {
+    return token.slice(0, -2);
+  }
+  if (token.length > 4 && token.endsWith('es')) {
+    return token.slice(0, -2);
+  }
+  if (token.length > 3 && token.endsWith('s')) {
+    return token.slice(0, -1);
+  }
+  return token;
+}
+
+function levenshteinDistance(left: string, right: string) {
+  const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  const current = Array.from({ length: right.length + 1 }, () => 0);
+
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    current[0] = leftIndex;
+
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitutionCost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      current[rightIndex] = Math.min(
+        previous[rightIndex] + 1,
+        current[rightIndex - 1] + 1,
+        previous[rightIndex - 1] + substitutionCost,
+      );
+    }
+
+    for (let index = 0; index <= right.length; index += 1) {
+      previous[index] = current[index];
+    }
+  }
+
+  return previous[right.length];
 }

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Focus, LayoutList, Search, X } from 'lucide-react';
+import { Focus, Languages, LayoutList, Search, X } from 'lucide-react';
 import { CategoryFilter } from '@/src/components/CategoryFilter';
 import { EmptyState } from '@/src/components/EmptyState';
 import { ProgressBar } from '@/src/components/ProgressBar';
@@ -47,6 +47,10 @@ export function StudyPage() {
   const jumpResults = useMemo(
     () => getJumpResults(jumpQuery, questions),
     [jumpQuery],
+  );
+  const hasNepaliTranslations = useMemo(
+    () => questions.some((question) => question.nepaliQuestion || question.nepaliAnswers?.length),
+    [],
   );
 
   const toggleExpanded = useCallback((questionId: string, visible: boolean) => {
@@ -218,6 +222,24 @@ export function StudyPage() {
             >
               Questions Only
             </button>
+            {hasNepaliTranslations ? (
+              <button
+                className={`secondary-action focus-ring ${
+                  progress.preferences.showNepali ? 'is-active' : ''
+                }`}
+                type="button"
+                aria-label={
+                  progress.preferences.showNepali
+                    ? 'Hide Nepali translations'
+                    : 'Show Nepali translations'
+                }
+                aria-pressed={progress.preferences.showNepali}
+                onClick={() => progressApi.setShowNepali(!progress.preferences.showNepali)}
+              >
+                <Languages aria-hidden="true" size={16} />
+                नेपाली
+              </button>
+            ) : null}
             <button
               className="secondary-action focus-ring"
               type="button"
@@ -250,6 +272,7 @@ export function StudyPage() {
           position={focusQuestion.number ?? safeFocusIndex + 1}
           total={questionSetMeta.totalQuestions}
           isFavorite={progress.favoriteIds.includes(focusQuestion.id)}
+          allowNepali={true}
           showNepaliByDefault={progress.preferences.showNepali}
           answerVisible={expandedIds.has(focusQuestion.id)}
           questionOnly={questionOnly}
@@ -283,6 +306,7 @@ export function StudyPage() {
                       position={question.number ?? 0}
                       total={questionSetMeta.totalQuestions}
                       isFavorite={progress.favoriteIds.includes(question.id)}
+                      allowNepali={true}
                       showNepaliByDefault={progress.preferences.showNepali}
                       answerVisible={expandedIds.has(question.id)}
                       questionOnly={questionOnly}

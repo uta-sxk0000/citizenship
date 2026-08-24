@@ -17,6 +17,7 @@ interface QuestionCardProps {
   position: number;
   total: number;
   isFavorite: boolean;
+  allowNepali?: boolean;
   showNepaliByDefault?: boolean;
   answerVisible?: boolean;
   questionOnly?: boolean;
@@ -37,6 +38,7 @@ export function QuestionCard({
   position,
   total,
   isFavorite,
+  allowNepali = false,
   showNepaliByDefault = false,
   answerVisible,
   questionOnly = false,
@@ -51,12 +53,15 @@ export function QuestionCard({
   canNext = true,
   primaryActionLabel = 'I Know This',
 }: QuestionCardProps) {
+  const hasNepali = Boolean(question.nepaliQuestion || question.nepaliAnswers?.length);
   const [internalAnswerVisible, setInternalAnswerVisible] = useState(false);
-  const [nepaliVisible, setNepaliVisible] = useState(showNepaliByDefault);
+  const [nepaliVisible, setNepaliVisible] = useState(
+    showNepaliByDefault && allowNepali && hasNepali,
+  );
   const resolvedAnswerVisible = questionOnly
     ? false
     : answerVisible ?? internalAnswerVisible;
-  const hasNepali = Boolean(question.nepaliQuestion || question.nepaliAnswers?.length);
+  const canShowNepali = allowNepali && hasNepali;
   const nepaliPanelId = `nepali-panel-${question.id}`;
   const setAnswerVisible = (visible: boolean) => {
     if (onAnswerVisibleChange) {
@@ -138,11 +143,12 @@ export function QuestionCard({
         )}
       </div>
 
-      {hasNepali ? (
+      {canShowNepali ? (
         <div className="nepali-region">
           <button
             className="quiet-action focus-ring"
             type="button"
+            aria-label={nepaliVisible ? 'Hide Nepali translation' : 'Show Nepali translation'}
             aria-expanded={nepaliVisible}
             aria-controls={nepaliPanelId}
             onClick={() => setNepaliVisible((value) => !value)}

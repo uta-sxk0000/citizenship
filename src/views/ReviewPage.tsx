@@ -67,12 +67,11 @@ export function ReviewPage() {
         />
       ) : currentQuestion ? (
         <QuestionCard
-          key={`${currentQuestion.id}-${progress.preferences.showNepali}`}
+          key={currentQuestion.id}
           question={currentQuestion}
           position={safeIndex + 1}
           total={reviewQuestions.length}
           isFavorite={progress.favoriteIds.includes(currentQuestion.id)}
-          showNepaliByDefault={progress.preferences.showNepali}
           onKnow={progressApi.markMastered}
           onNeedPractice={progressApi.markNeedsPractice}
           onToggleFavorite={progressApi.toggleFavorite}

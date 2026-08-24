@@ -48,6 +48,10 @@ export const questions = [
     "answers": [
       "(U.S.) Constitution"
     ],
+    "nepaliQuestion": "देशको सर्वोच्च कानून के हो?",
+    "nepaliAnswers": [
+      "संविधान"
+    ],
     "type": "civics",
     "sourcePage": 2,
     "specialConsideration": true,
@@ -66,6 +70,13 @@ export const questions = [
       "Defines powers of government",
       "Defines the parts of government",
       "Protects the rights of the people"
+    ],
+    "nepaliQuestion": "संविधानले के गर्छ?",
+    "nepaliAnswers": [
+      "सरकारको संरचना बनाउँछ",
+      "सरकारका अधिकारहरू परिभाषित गर्छ",
+      "सरकारका भागहरू परिभाषित गर्छ",
+      "जनताको अधिकार संरक्षण गर्छ"
     ],
     "type": "civics",
     "sourcePage": 2,
