@@ -1,4 +1,5 @@
 import type { CitizenshipQuestion } from '@/src/types/question';
+import { nepaliTranslations } from '@/src/data/nepaliTranslations';
 import { warnIfInvalidQuestionSet } from '@/src/utils/validation';
 
 /*
@@ -20,7 +21,7 @@ export const questionSetMeta = {
   ],
 } as const;
 
-export const questions = [
+const baseQuestions = [
   {
     "id": "q001",
     "number": 1,
@@ -428,14 +429,16 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "Who is one of your state’s U.S. senators now?",
     "answers": [
-      "Answers will vary. [District of Columbia residents and residents of U.S. territories should answer that D.C. (or the territory where the applicant lives) has no U.S. senators.]"
+      "John Cornyn",
+      "Ted Cruz"
     ],
     "type": "civics",
     "sourcePage": 4,
     "specialConsideration": false,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": true,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Texas answer. Verified from the official U.S. Senate state listing."
   },
   {
     "id": "q024",
@@ -525,14 +528,15 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "Name your U.S. representative.",
     "answers": [
-      "Answers will vary. [Residents of territories with nonvoting Delegates or Resident Commissioners may provide the name of that Delegate or Commissioner. Also acceptable is any statement that the territory has no (voting) representatives in Congress.]"
+      "Your U.S. Representative depends on your Texas congressional district. Use house.gov with your ZIP code or address to find the exact name."
     ],
     "type": "civics",
     "sourcePage": 5,
     "specialConsideration": false,
-    "answerInstruction": "Accepted answer.",
+    "answerInstruction": "District-specific answer.",
     "variableAnswer": true,
-    "currentAnswer": false
+    "currentAnswer": false,
+    "note": "Texas has multiple congressional districts, so this cannot be determined from the state alone."
   },
   {
     "id": "q030",
@@ -541,14 +545,17 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "What is the name of the Speaker of the House of Representatives now?",
     "answers": [
-      "Visit uscis.gov/citizenship/testupdates for the name of the Speaker of the House of Representatives."
+      "Mike Johnson",
+      "Johnson",
+      "James Michael Johnson"
     ],
     "type": "civics",
     "sourcePage": 5,
     "specialConsideration": true,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": false,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Verified from USCIS civics test updates."
   },
   {
     "id": "q031",
@@ -676,14 +683,17 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "What is the name of the President of the United States now?",
     "answers": [
-      "Visit uscis.gov/citizenship/testupdates for the name of the President of the United States."
+      "Donald J. Trump",
+      "Donald Trump",
+      "Trump"
     ],
     "type": "civics",
     "sourcePage": 5,
     "specialConsideration": true,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": false,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Verified from USCIS civics test updates."
   },
   {
     "id": "q039",
@@ -692,14 +702,16 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "What is the name of the Vice President of the United States now?",
     "answers": [
-      "Visit uscis.gov/citizenship/testupdates for the name of the Vice President of the United States."
+      "JD Vance",
+      "Vance"
     ],
     "type": "civics",
     "sourcePage": 6,
     "specialConsideration": true,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": false,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Verified from USCIS civics test updates."
   },
   {
     "id": "q040",
@@ -1016,14 +1028,17 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "Who is the Chief Justice of the United States now?",
     "answers": [
-      "Visit uscis.gov/citizenship/testupdates for the name of the Chief Justice of the United States."
+      "John Roberts",
+      "John G. Roberts, Jr.",
+      "Roberts"
     ],
     "type": "civics",
     "sourcePage": 8,
     "specialConsideration": false,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": false,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Verified from USCIS civics test updates."
   },
   {
     "id": "q058",
@@ -1089,14 +1104,16 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "Who is the governor of your state now?",
     "answers": [
-      "Answers will vary. [District of Columbia residents should answer that D.C. does not have a governor.]"
+      "Greg Abbott",
+      "Abbott"
     ],
     "type": "civics",
     "sourcePage": 8,
     "specialConsideration": true,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": true,
-    "currentAnswer": true
+    "currentAnswer": true,
+    "note": "Texas answer. Verified from the Office of the Texas Governor."
   },
   {
     "id": "q062",
@@ -1105,14 +1122,15 @@ export const questions = [
     "subcategory": "System of Government",
     "question": "What is the capital of your state?",
     "answers": [
-      "Answers will vary. [District of Columbia residents should answer that D.C. is not a state and does not have a capital. Residents of U.S. territories should name the capital of the territory.]"
+      "Austin"
     ],
     "type": "civics",
     "sourcePage": 8,
     "specialConsideration": false,
     "answerInstruction": "Accepted answer.",
     "variableAnswer": true,
-    "currentAnswer": false
+    "currentAnswer": false,
+    "note": "Texas answer. Verified from official Texas state resources."
   },
   {
     "id": "q063",
@@ -2364,5 +2382,10 @@ export const questions = [
     "currentAnswer": false
   }
 ] satisfies CitizenshipQuestion[];
+
+export const questions = baseQuestions.map((question) => ({
+  ...question,
+  ...nepaliTranslations[question.id],
+})) satisfies CitizenshipQuestion[];
 
 warnIfInvalidQuestionSet(questions);
