@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Gauge, Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { prepareVoices, speakText, supportsSpeech } from '@/src/utils/speech';
 
 interface SpeechButtonProps {
@@ -9,7 +9,6 @@ interface SpeechButtonProps {
   label: string;
   rate?: number;
   variant?: 'primary' | 'subtle' | 'ghost';
-  slow?: boolean;
 }
 
 export function SpeechButton({
@@ -17,7 +16,6 @@ export function SpeechButton({
   label,
   rate = 0.95,
   variant = 'subtle',
-  slow = false,
 }: SpeechButtonProps) {
   const [available, setAvailable] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -45,7 +43,7 @@ export function SpeechButton({
     }
   };
 
-  const Icon = !available ? VolumeX : slow ? Gauge : Volume2;
+  const Icon = !available ? VolumeX : Volume2;
 
   return (
     <button

@@ -6,9 +6,9 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Languages,
   RotateCcw,
 } from 'lucide-react';
+import { NepaliToggleButton } from '@/src/components/NepaliToggleButton';
 import { SpeechButton } from '@/src/components/SpeechButton';
 import type { CitizenshipQuestion } from '@/src/types/question';
 
@@ -57,6 +57,7 @@ export function QuestionCard({
     ? false
     : answerVisible ?? internalAnswerVisible;
   const hasNepali = Boolean(question.nepaliQuestion || question.nepaliAnswers?.length);
+  const nepaliPanelId = `nepali-panel-${question.id}`;
   const setAnswerVisible = (visible: boolean) => {
     if (onAnswerVisibleChange) {
       onAnswerVisibleChange(visible);
@@ -90,14 +91,13 @@ export function QuestionCard({
 
       <div className="question-line">
         <h2 id={`question-title-${question.id}`}>{question.question}</h2>
-        <div className="audio-cluster" aria-label="Question audio controls">
+        <div className="audio-cluster" aria-label="Question audio and language controls">
           <SpeechButton label="Listen to question" text={question.question} variant="primary" />
-          <SpeechButton
-            label="Listen to question slowly"
-            rate={0.7}
-            slow
-            text={question.question}
-            variant="ghost"
+          <NepaliToggleButton
+            active={nepaliVisible}
+            available={hasNepali}
+            controls={nepaliPanelId}
+            onToggle={() => setNepaliVisible((value) => !value)}
           />
         </div>
       </div>
@@ -132,13 +132,6 @@ export function QuestionCard({
                   <span>{answer}</span>
                   <div className="audio-cluster answer-audio" aria-label="Answer audio controls">
                     <SpeechButton label={`Listen to answer: ${answer}`} text={answer} />
-                    <SpeechButton
-                      label={`Listen slowly to answer: ${answer}`}
-                      rate={0.7}
-                      slow
-                      text={answer}
-                      variant="ghost"
-                    />
                   </div>
                 </li>
               ))}
@@ -151,31 +144,20 @@ export function QuestionCard({
         )}
       </div>
 
-      {hasNepali ? (
+      {hasNepali && nepaliVisible ? (
         <div className="nepali-region">
-          <button
-            className="quiet-action focus-ring"
-            type="button"
-            aria-expanded={nepaliVisible}
-            onClick={() => setNepaliVisible((value) => !value)}
-          >
-            <Languages aria-hidden="true" size={16} />
-            नेपाली
-          </button>
-          {nepaliVisible ? (
-            <section className="nepali-panel" aria-label="Nepali translation">
-              {question.nepaliQuestion ? (
-                <p>
-                  <strong>नेपाली:</strong> {question.nepaliQuestion}
-                </p>
-              ) : null}
-              {question.nepaliAnswers?.length ? (
-                <p>
-                  <strong>उत्तर:</strong> {question.nepaliAnswers.join(' · ')}
-                </p>
-              ) : null}
-            </section>
-          ) : null}
+          <section id={nepaliPanelId} className="nepali-panel" aria-label="Nepali translation">
+            {question.nepaliQuestion ? (
+              <p>
+                <strong>नेपाली:</strong> {question.nepaliQuestion}
+              </p>
+            ) : null}
+            {resolvedAnswerVisible && question.nepaliAnswers?.length ? (
+              <p>
+                <strong>उत्तर:</strong> {question.nepaliAnswers.join(' · ')}
+              </p>
+            ) : null}
+          </section>
         </div>
       ) : null}
 

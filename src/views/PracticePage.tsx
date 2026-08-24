@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useMemo, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { EmptyState } from '@/src/components/EmptyState';
+import { NepaliToggleButton } from '@/src/components/NepaliToggleButton';
 import { ProgressBar } from '@/src/components/ProgressBar';
 import { SpeechButton } from '@/src/components/SpeechButton';
 import { USFlagMark } from '@/src/components/USFlagMark';
@@ -24,10 +25,14 @@ export function PracticePage() {
   const [answerVisible, setAnswerVisible] = useState(false);
   const [answers, setAnswers] = useState<PracticeAnswer[]>([]);
   const [complete, setComplete] = useState(false);
-  const { recordAnswer, recordPracticeSession } = useProgress();
+  const { progress, recordAnswer, recordPracticeSession, setShowNepali } = useProgress();
 
   const pool = useMemo(() => filterQuestions(filter), [filter]);
   const currentQuestion = sessionQuestions[currentIndex];
+  const currentQuestionHasNepali = Boolean(
+    currentQuestion?.nepaliQuestion || currentQuestion?.nepaliAnswers?.length,
+  );
+  const nepaliPanelId = currentQuestion ? `practice-nepali-${currentQuestion.id}` : undefined;
   const score = answers.filter((answer) => answer.correct).length;
   const incorrectAnswers = answers.filter((answer) => !answer.correct);
 
@@ -199,14 +204,28 @@ export function PracticePage() {
         <h1>{currentQuestion.question}</h1>
         <div className="interview-audio">
           <SpeechButton label="Listen to interview question" text={currentQuestion.question} variant="primary" />
-          <SpeechButton
-            label="Listen to interview question slowly"
-            rate={0.7}
-            slow
-            text={currentQuestion.question}
-            variant="ghost"
+          <NepaliToggleButton
+            active={progress.preferences.showNepali}
+            available={currentQuestionHasNepali}
+            controls={nepaliPanelId}
+            onToggle={() => setShowNepali(!progress.preferences.showNepali)}
           />
         </div>
+
+        {currentQuestionHasNepali && progress.preferences.showNepali ? (
+          <section id={nepaliPanelId} className="nepali-panel interview-nepali-panel" aria-label="Nepali translation">
+            {currentQuestion.nepaliQuestion ? (
+              <p>
+                <strong>नेपाली:</strong> {currentQuestion.nepaliQuestion}
+              </p>
+            ) : null}
+            {answerVisible && currentQuestion.nepaliAnswers?.length ? (
+              <p>
+                <strong>उत्तर:</strong> {currentQuestion.nepaliAnswers.join(' · ')}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
         {!answerVisible ? (
           <button
