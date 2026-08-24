@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ArrowRight, BookOpen, GraduationCap, ListChecks, RotateCcw } from 'lucide-react';
+import { ArrowRight, BookOpen, GraduationCap, ListChecks, Mic, RotateCcw } from 'lucide-react';
 import { ButtonLink } from '@/src/components/ButtonLink';
 import { ProgressBar } from '@/src/components/ProgressBar';
 import { USFlagMark } from '@/src/components/USFlagMark';
@@ -30,6 +30,9 @@ export function HomePage() {
             <ButtonLink href="/study">Study All 128 Questions</ButtonLink>
             <ButtonLink href="/practice" variant="secondary">
               Start Practice Interview
+            </ButtonLink>
+            <ButtonLink href="/interview" variant="secondary">
+              Real Interview Audio
             </ButtonLink>
           </div>
         </div>
@@ -70,6 +73,13 @@ export function HomePage() {
           description="Answer without seeing the accepted answer first."
           href="/practice"
           action="Begin Interview"
+        />
+        <FeatureCard
+          icon={<Mic aria-hidden="true" size={22} />}
+          title="Real Interview"
+          description="Answer aloud and check key answer words with browser audio."
+          href="/interview"
+          action="Start Audio Interview"
         />
         <FeatureCard
           icon={<RotateCcw aria-hidden="true" size={22} />}

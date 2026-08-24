@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Languages, Menu, Moon, Search, Sun } from 'lucide-react';
+import { Menu, Moon, Search, Sun } from 'lucide-react';
 import { useState } from 'react';
 import { USFlagMark } from '@/src/components/USFlagMark';
 import { useProgress } from '@/src/hooks/useProgress';
@@ -11,6 +11,7 @@ const navItems = [
   { href: '/', label: 'Home' },
   { href: '/study', label: 'Study All' },
   { href: '/practice', label: 'Practice' },
+  { href: '/interview', label: 'Real Interview' },
   { href: '/review', label: 'Review' },
   { href: '/progress', label: 'Progress' },
 ];
@@ -18,7 +19,7 @@ const navItems = [
 export function Header() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { progress, setTheme, setShowNepali } = useProgress();
+  const { progress, setTheme } = useProgress();
   const nextTheme = getNextTheme(progress.preferences.theme);
   const ThemeIcon = progress.preferences.theme === 'dark' ? Moon : Sun;
 
@@ -50,16 +51,6 @@ export function Header() {
             <Search aria-hidden="true" size={17} />
             <span>Search</span>
           </a>
-          <button
-            className="icon-action focus-ring"
-            type="button"
-            aria-label="Toggle Nepali translations"
-            aria-pressed={progress.preferences.showNepali}
-            onClick={() => setShowNepali(!progress.preferences.showNepali)}
-            title="Nepali"
-          >
-            <Languages aria-hidden="true" size={17} />
-          </button>
           <button
             className="icon-action focus-ring"
             type="button"
@@ -99,15 +90,6 @@ export function Header() {
             ))}
           </nav>
           <div className="mobile-nav-actions">
-            <button
-              className="secondary-action focus-ring"
-              type="button"
-              aria-pressed={progress.preferences.showNepali}
-              onClick={() => setShowNepali(!progress.preferences.showNepali)}
-            >
-              <Languages aria-hidden="true" size={16} />
-              नेपाली
-            </button>
             <button
               className="secondary-action focus-ring"
               type="button"

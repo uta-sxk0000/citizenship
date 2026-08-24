@@ -23,6 +23,9 @@ export function Footer() {
           <a className="focus-ring" href="/practice">
             Practice
           </a>
+          <a className="focus-ring" href="/interview">
+            Real Interview
+          </a>
           <a className="focus-ring" href="/progress">
             Progress
           </a>

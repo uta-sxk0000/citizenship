@@ -20,6 +20,9 @@ export interface CitizenshipQuestion {
   nepaliExplanation?: string;
   note?: string;
   acceptedAnswers?: string[];
+  keywords?: string[];
+  keywordGroups?: string[][];
+  requiredMatches?: number;
   type?: QuestionType;
   sourcePage?: number;
   currentAnswer?: boolean;

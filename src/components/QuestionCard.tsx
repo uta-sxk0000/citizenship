@@ -6,9 +6,9 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Languages,
   RotateCcw,
 } from 'lucide-react';
-import { NepaliToggleButton } from '@/src/components/NepaliToggleButton';
 import { SpeechButton } from '@/src/components/SpeechButton';
 import type { CitizenshipQuestion } from '@/src/types/question';
 
@@ -91,14 +91,8 @@ export function QuestionCard({
 
       <div className="question-line">
         <h2 id={`question-title-${question.id}`}>{question.question}</h2>
-        <div className="audio-cluster" aria-label="Question audio and language controls">
+        <div className="audio-cluster" aria-label="Question audio controls">
           <SpeechButton label="Listen to question" text={question.question} variant="primary" />
-          <NepaliToggleButton
-            active={nepaliVisible}
-            available={hasNepali}
-            controls={nepaliPanelId}
-            onToggle={() => setNepaliVisible((value) => !value)}
-          />
         </div>
       </div>
 
@@ -144,20 +138,32 @@ export function QuestionCard({
         )}
       </div>
 
-      {hasNepali && nepaliVisible ? (
+      {hasNepali ? (
         <div className="nepali-region">
-          <section id={nepaliPanelId} className="nepali-panel" aria-label="Nepali translation">
-            {question.nepaliQuestion ? (
-              <p>
-                <strong>नेपाली:</strong> {question.nepaliQuestion}
-              </p>
-            ) : null}
-            {resolvedAnswerVisible && question.nepaliAnswers?.length ? (
-              <p>
-                <strong>उत्तर:</strong> {question.nepaliAnswers.join(' · ')}
-              </p>
-            ) : null}
-          </section>
+          <button
+            className="quiet-action focus-ring"
+            type="button"
+            aria-expanded={nepaliVisible}
+            aria-controls={nepaliPanelId}
+            onClick={() => setNepaliVisible((value) => !value)}
+          >
+            <Languages aria-hidden="true" size={16} />
+            नेपाली
+          </button>
+          {nepaliVisible ? (
+            <section id={nepaliPanelId} className="nepali-panel" aria-label="Nepali translation">
+              {question.nepaliQuestion ? (
+                <p>
+                  <strong>नेपाली:</strong> {question.nepaliQuestion}
+                </p>
+              ) : null}
+              {resolvedAnswerVisible && question.nepaliAnswers?.length ? (
+                <p>
+                  <strong>उत्तर:</strong> {question.nepaliAnswers.join(' · ')}
+                </p>
+              ) : null}
+            </section>
+          ) : null}
         </div>
       ) : null}
 
