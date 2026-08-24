@@ -4,7 +4,7 @@ Independent U.S. naturalization interview and citizenship practice app for `citi
 
 ## Question Data
 
-All question content lives in `src/data/questions.ts`. The file currently contains clearly marked sample data only. Replace or extend the exported `questions` array with your real questions when ready. Keep Nepali translations in the optional `nepaliQuestion`, `nepaliAnswers`, and `nepaliExplanation` fields. The app does not call a translation API or machine-translate citizenship content.
+All question content lives in `src/data/questions.ts`. The file contains all 128 questions and accepted answers from the 2025 USCIS civics test PDF in official order.
 
 Questions support current or changeable answers with `currentAnswer: true`, which displays a reminder to verify the answer before the interview.
 
@@ -34,7 +34,13 @@ Build:
 pnpm run build
 ```
 
-## Cloudflare Pages
+## Deployment
+
+The app is built with Vinext and deployed through OpenAI Sites. The production deployment can be connected to:
+
+```text
+citizenship.khadkasagar.name.np
+```
 
 Build command:
 
@@ -42,21 +48,13 @@ Build command:
 pnpm run build
 ```
 
-Deploy directory:
+The generated deployable output is:
 
 ```text
 dist
 ```
 
 The app uses route files for `/`, `/study`, `/practice`, `/review`, and `/progress`. With this Sites/Vinext setup, nested route refreshes are handled by the generated Cloudflare-compatible output in `dist`.
-
-To connect the custom domain:
-
-1. Create or select the Cloudflare Pages project for this app.
-2. Deploy the `dist` output from this project, not the main `khadkasagar.name.np` website.
-3. In Cloudflare Pages, add `citizenship.khadkasagar.name.np` as a custom domain.
-4. Follow Cloudflare's DNS prompt to create the required CNAME for the subdomain.
-5. Do not change DNS records for `khadkasagar.name.np` unless you intentionally want to alter the main website.
 
 ## Browser Features
 
