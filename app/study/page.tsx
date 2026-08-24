@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { StudyPage } from '@/src/pages/StudyPage';
+import { StudyPage } from '@/src/views/StudyPage';
 
 export default function Study() {
   return (

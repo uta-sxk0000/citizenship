@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { ReviewPage } from '@/src/pages/ReviewPage';
+import { ReviewPage } from '@/src/views/ReviewPage';
 
 export default function Review() {
   return (

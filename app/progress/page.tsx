@@ -1,4 +1,4 @@
-import { ProgressPage } from '@/src/pages/ProgressPage';
+import { ProgressPage } from '@/src/views/ProgressPage';
 
 export default function Progress() {
   return <ProgressPage />;

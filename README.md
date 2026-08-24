@@ -36,25 +36,36 @@ pnpm run build
 
 ## Deployment
 
-The app is built with Vinext and deployed through OpenAI Sites. The production deployment can be connected to:
+The default scripts are configured for Vercel / Next.js deployment. The production deployment can be connected to:
 
 ```text
 citizenship.khadkasagar.name.np
 ```
 
-Build command:
+Vercel settings:
+
+```text
+Framework: Next.js
+Install command: pnpm install --frozen-lockfile
+Build command: pnpm run build
+Output directory: .next
+```
+
+Local build command:
 
 ```bash
 pnpm run build
 ```
 
-The generated deployable output is:
+The app also keeps Vinext/OpenAI Sites scripts available for the existing Sites deployment:
 
-```text
-dist
+```bash
+pnpm run dev:sites
+pnpm run build:sites
+pnpm run start:sites
 ```
 
-The app uses route files for `/`, `/study`, `/practice`, `/review`, and `/progress`. With this Sites/Vinext setup, nested route refreshes are handled by the generated Cloudflare-compatible output in `dist`.
+The app uses route files for `/`, `/study`, `/practice`, `/review`, and `/progress`.
 
 ## Browser Features
 
